@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>LeadAlchemy – Live Lead Sheets for Cold Outreach</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    :root {
+      --bg: #020617;
+      --bg-soft: #020617;
+      --bg-elevated: #020617;
+      --bg-card: #020617;
+      --border-subtle: rgba(148, 163, 184, 0.18);
+      --border-strong: rgba(250, 204, 21, 0.7);
+      --text-main: #e5e7eb;
+      --text-muted: #94a3b8;
+      --accent-gold: #facc15;
+      --accent-gold-soft: rgba(250, 204, 21, 0.15);
+      --accent-teal: #22c1c3;
+      --accent-teal-soft: rgba(34, 193, 195, 0.18);
+      --card-radius: 1.25rem;
+      --section-radius: 1.75rem;
+      --shadow-soft: 0 18px 60px rgba(15, 23, 42, 0.9);
+      --shadow-glow: 0 0 100px rgba(250, 204, 21, 0.1);
+      --max-width: 1120px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+
+    body {
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #020617 0, #020617 45%, #020617 100%);
+      color: var(--text-main);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    .page {
+      position: relative;
+      min-height: 100vh;
+      padding: 1.75rem 1.25rem 4rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      isolation: isolate;
+    }
+
+    .page::before {
+      content: "";
+      position: fixed;
+      inset: -200px;
+      background-image: 
+        radial-gradient(circle at top, rgba(34, 193, 195, 0.16), transparent 55%),
+        radial-gradient(circle at 10% 90%, rgba(250, 204, 21, 0.18), transparent 55%),
+        linear-gradient(to bottom, rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.95), #020617),
+        linear-gradient(rgba(148, 163, 184, 0.12) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(148, 163, 184, 0.12) 1px, transparent 1px);
+      background-size: 140% 140%, 140% 140%, cover, 80px 80px, 80px 80px;
+      background-position: 0% 0%, 100% 100%, center, 0 0, 0 0;
+      opacity: 0.6;
+      z-index: -3;
+      animation: gridDrift 34s linear infinite;
+    }
+
+    .page::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at top center, rgba(250, 204, 21, 0.22), transparent 60%);
+      opacity: 0.35;
+      pointer-events: none;
+      z-index: -2;
+      mix-blend-mode: screen;
+    }
+
+    .bg-orb {
+      position: fixed;
+      width: 420px;
+      height: 420px;
+      border-radius: 999px;
+      filter: blur(32px);
+      opacity: 0.25;
+      pointer-events: none;
+      mix-blend-mode: screen;
+      z-index: -1;
+      animation: orbFloat 26s ease-in-out infinite alternate;
+    }
+    .bg-orb.teal { background: radial-gradient(circle, rgba(34, 193, 195, 0.7), transparent 60%); top: 12%; left: -10%; }
+    .bg-orb.gold { background: radial-gradient(circle, rgba(250, 204, 21, 0.8), transparent 65%); bottom: -6%; right: -12%; animation-duration: 32s; animation-delay: -6s; }
+
+    @keyframes orbFloat {
+      0% { transform: translate3d(0, 0, 0); }
+      50% { transform: translate3d(30px, -20px, 0); }
+      100% { transform: translate3d(-20px, 25px, 0); }
+    }
+    @keyframes gridDrift {
+      0% { background-position: 0% 0%, 100% 100%, center, 0 0, 0 0; }
+      50% { background-position: 100% 100%, 0% 0%, center, 28px 32px, -26px -30px; }
+      100% { background-position: 0% 0%, 100% 100%, center, 0 0, 0 0; }
+    }
+
+    .shell { width: 100%; max-width: var(--max-width); }
+
+    .nav {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 1.5rem; margin-bottom: 2.25rem;
+    }
+    .nav-left { display: flex; align-items: center; gap: 0.6rem; }
+    .nav-title {
+      font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+      font-size: 0.86rem; color: var(--text-muted);
+    }
+    .nav-right { display: flex; align-items: center; gap: 0.75rem; font-size: 0.8rem; color: var(--text-muted); }
+    .nav-pill {
+      padding: 0.35rem 0.9rem; border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.45);
+      background: radial-gradient(circle at top, rgba(15, 23, 42, 0.8), #020617);
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    .nav-dot {
+      width: 7px; height: 7px; border-radius: 999px;
+      background: radial-gradient(circle at center, #22c1c3, #0f766e);
+      box-shadow: 0 0 16px rgba(34, 193, 195, 0.8);
+    }
+    .nav-cta-link {
+      border-radius: 999px; padding: 0.35rem 0.85rem;
+      border: 1px solid rgba(148, 163, 184, 0.45);
+      color: var(--text-main); text-decoration: none;
+      transition: border-color 0.18s ease, color 0.18s ease, background-color 0.18s ease, transform 0.15s ease;
+    }
+    .nav-cta-link:hover {
+      border-color: rgba(250, 204, 21, 0.8);
+      color: var(--accent-gold);
+      background-color: rgba(15, 23, 42, 0.8);
+      transform: translateY(-1px);
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+      gap: 2.75rem;
+      align-items: center;
+      padding: 2.25rem 2rem 2.4rem;
+      border-radius: var(--section-radius);
+      border: 1px solid rgba(148, 163, 184, 0.45);
+      background: radial-gradient(circle at top left, rgba(15, 23, 42, 0.85), #020617);
+      box-shadow: var(--shadow-soft), var(--shadow-glow);
+      margin-bottom: 2.75rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: "";
+      position: absolute; inset: -1px; border-radius: inherit;
+      background: conic-gradient(from 160deg, rgba(250, 204, 21, 0.15), rgba(34, 193, 195, 0.2), transparent, transparent, rgba(34, 193, 195, 0.1), rgba(250, 204, 21, 0.2));
+      opacity: 0.15;
+      pointer-events: none;
+      z-index: -1;
+      animation: borderGlow 12s ease-in-out infinite alternate;
+    }
+    @keyframes borderGlow { 0% { opacity: 0.15; } 100% { opacity: 0.5; } }
+
+    .hero-main-subtitle {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.3rem 0.75rem; border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      background: radial-gradient(circle at top, rgba(15, 23, 42, 0.9), #020617);
+      color: var(--accent-teal);
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      margin-bottom: 0.9rem;
+    }
+    .hero-main-subtitle span {
+      width: 7px; height: 7px; border-radius: 999px;
+      background: radial-gradient(circle, #22c1c3, #155e75);
+      box-shadow: 0 0 14px rgba(34, 193, 195, 0.85);
+    }
+    .hero-title {
+      font-size: clamp(2.45rem, 3vw, 3.1rem);
+      line-height: 1.08;
+      letter-spacing: -0.035em;
+      font-weight: 700;
+      margin-bottom: 0.8rem;
+    }
+    .hero-title span {
+      background: linear-gradient(to right, #facc15, #22c1c3);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .hero-subtext { color: var(--text-muted); font-size: 0.98rem; max-width: 29rem; margin-bottom: 1.6rem; }
+
+    .hero-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 0.85rem; margin-bottom: 1.5rem; }
+
+    .btn-primary {
+      padding: 0.7rem 1.45rem;
+      border-radius: 999px;
+      font-size: 0.92rem;
+      font-weight: 500;
+      border: 1px solid rgba(252, 211, 77, 0.9);
+      color: #020617;
+      background: radial-gradient(circle at top left, #facc15, #fbbf24);
+      box-shadow: 0 16px 40px rgba(250, 204, 21, 0.45);
+      cursor: pointer;
+      transition: transform 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
+    }
+    .btn-primary:hover { transform: translateY(-1.5px); box-shadow: 0 18px 45px rgba(250, 204, 21, 0.5); background: radial-gradient(circle at top left, #facc15, #eab308); }
+
+    .btn-ghost {
+      padding: 0.7rem 1.35rem;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.55);
+      background: rgba(15, 23, 42, 0.8);
+      color: var(--text-main);
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: border-color 0.18s ease, background-color 0.18s ease, transform 0.16s ease;
+    }
+    .btn-ghost:hover { border-color: rgba(250, 204, 21, 0.7); background-color: rgba(15, 23, 42, 0.95); transform: translateY(-1px); }
+    .btn-ghost::after { content: "→"; font-size: 0.88rem; opacity: 0.85; transform: translateX(0); transition: transform 0.16s ease; }
+    .btn-ghost:hover::after { transform: translateX(2px); }
+
+    .hero-footnote { font-size: 0.8rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.4rem; }
+    .hero-footnote span {
+      width: 14px; height: 14px; border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 0.6rem; color: var(--accent-gold);
+    }
+
+    .hero-visual { position: relative; display: flex; justify-content: center; }
+    .hero-orbit {
+      position: absolute; inset: 5%;
+      border-radius: 30px;
+      border: 1px dashed rgba(148, 163, 184, 0.2);
+      opacity: 0.7;
+      transform-origin: center;
+      animation: orbitDrift 26s linear infinite;
+    }
+    @keyframes orbitDrift { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    .hero-card {
+      width: 100%;
+      max-width: 320px;
+      border-radius: 26px;
+      padding: 1.25rem 1.15rem 1.4rem;
+      background: radial-gradient(circle at top, rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.98)),
+        linear-gradient(to bottom right, rgba(148, 163, 184, 0.22), rgba(15, 23, 42, 0.9));
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      box-shadow: 0 18px 55px rgba(15, 23, 42, 0.95);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .pricing {
+      margin-bottom: 2.75rem;
+      padding: 1.9rem 1.7rem 2.2rem;
+      border-radius: var(--section-radius);
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      background: radial-gradient(circle at top, rgba(15, 23, 42, 0.92), rgba(15, 23, 42, 0.98));
+      position: relative;
+      overflow: hidden;
+    }
+    .pricing-inner { position: relative; z-index: 1; }
+    .plans { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.4rem; }
+
+    .plan {
+      border-radius: var(--card-radius);
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      background: radial-gradient(circle at top, rgba(15, 23, 42, 0.94), rgba(15, 23, 42, 0.98));
+      padding: 2.2rem 1.6rem 1.7rem;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      position: relative;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+    }
+    .plan:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 20px 55px rgba(15, 23, 42, 0.95);
+      border-color: rgba(250, 204, 21, 0.7);
+    }
+
+    .plan-name { font-size: 1rem; font-weight: 500; }
+    .plan-price { font-size: 1.5rem; font-weight: 600; margin: 0.3rem 0 0.12rem; }
+    .plan-price span { font-size: 0.78rem; font-weight: 400; color: var(--text-muted); }
+    .plan-caption { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.9rem; }
+    .plan-list { list-style: none; margin-bottom: 1.2rem; font-size: 0.86rem; color: var(--text-muted); }
+    .plan-list li { display: flex; align-items: flex-start; gap: 0.45rem; margin-bottom: 0.35rem; }
+    .plan-list-bullet { width: 6px; height: 6px; margin-top: 0.35rem; border-radius: 999px; background: radial-gradient(circle, #22c1c3, #0f766e); flex-shrink: 0; }
+
+    .plan-cta { margin-top: auto; display: flex; flex-direction: column; gap: 0.5rem; }
+    .plan-button {
+      padding: 0.7rem 1.1rem;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      background: rgba(15, 23, 42, 0.96);
+      color: var(--text-main);
+      font-size: 0.88rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: transform 0.14s ease, border-color 0.14s ease;
+    }
+    .plan-button:hover { transform: translateY(-1px); border-color: rgba(250, 204, 21, 0.7); }
+
+    .plan-popular { border-color: rgba(250, 204, 21, 0.75); box-shadow: 0 16px 40px rgba(250, 204, 21, 0.3); }
+    .plan-badge {
+      position: absolute;
+      top: -14px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 0.35rem 0.9rem;
+      border-radius: 999px;
+      background: linear-gradient(to right, rgba(250, 204, 21, 0.98), rgba(234, 179, 8, 0.98));
+      color: #020617;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      box-shadow: 0 8px 20px rgba(250, 204, 21, 0.7);
+      white-space: nowrap;
+      z-index: 3;
+    }
+
+    .footer { font-size: 0.78rem; color: var(--text-muted); display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; border-top: 1px solid rgba(30, 41, 59, 0.9); padding-top: 1.2rem; margin-top: 0.4rem; }
+    .footer-links { display: flex; gap: 0.9rem; flex-wrap: wrap; }
+    .footer a { color: var(--text-muted); text-decoration: none; }
+    .footer a:hover { color: var(--accent-gold); }
+
+    @media (max-width: 960px) {
+      .hero { grid-template-columns: 1fr; padding: 1.8rem 1.5rem 1.9rem; }
+      .hero-visual { order: -1; margin-bottom: 1rem; }
+      .plans { grid-template-columns: 1fr; }
+      .nav { flex-direction: column; align-items: flex-start; }
+      .nav-right { align-self: stretch; justify-content: space-between; }
+    }
+
+    @media (max-width: 640px) {
+      .page { padding-inline: 1rem; }
+      .hero { padding: 1.5rem 1.1rem 1.65rem; }
+      .pricing { padding: 1.4rem 1.1rem 1.6rem; }
+      .hero-title { font-size: 2.05rem; }
+      .hero-card { max-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-orb teal"></div>
+  <div class="bg-orb gold"></div>
+
+  <div class="page">
+    <div class="shell">
+
+      <header class="nav">
+        <div class="nav-left">
+          <div class="nav-title">LeadAlchemy</div>
+        </div>
+        <div class="nav-right">
+          <div class="nav-pill">
+            <div class="nav-dot"></div>
+            <span>Live lead sheet systems</span>
+          </div>
+          <a href="#pricing" class="nav-cta-link">View pricing</a>
+        </div>
+      </header>
+
+      <main>
+        <section class="hero">
+          <div class="hero-main">
+            <div class="hero-main-subtitle"><span></span> niche-based lead sheets</div>
+            <h1 class="hero-title">Turn <span>public web data</span> into a live lead sheet you can call today.</h1>
+            <p class="hero-subtext">
+              Done-for-you Google Sheet + automation that keeps adding new leads over time.
+              You handle the calls and emails — the system keeps the sheet filling up.
+            </p>
+            <div class="hero-actions">
+              <button class="btn-primary" onclick="document.getElementById('pricing').scrollIntoView({behavior:'smooth'})">
+                See pricing
+              </button>
+              <button class="btn-ghost" onclick="document.getElementById('pricing').scrollIntoView({behavior:'smooth'})">
+                Choose your niche
+              </button>
+            </div>
+            <p class="hero-footnote"><span>⚡</span> Cancel anytime • You own the sheet + data</p>
+          </div>
+
+          <div class="hero-visual">
+            <div class="hero-orbit"></div>
+            <div class="hero-card">
+              <div style="position:relative; z-index:1;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.85rem;">
+                  <div style="font-size:0.78rem; text-transform:uppercase; letter-spacing:0.16em; color: var(--text-muted);">Live Sheet</div>
+                  <div style="padding:0.18rem 0.55rem; border-radius:999px; border:1px solid rgba(34, 193, 195, 0.7); color: var(--accent-teal); font-size:0.7rem; display:inline-flex; align-items:center; gap:0.25rem;">
+                    <span style="width:6px; height:6px; border-radius:999px; background: radial-gradient(circle, #22c1c3, #155e75); box-shadow:0 0 12px rgba(34, 193, 195, 0.8);"></span>
+                    Running
+                  </div>
+                </div>
+
+                <div style="background: rgba(15, 23, 42, 0.9); border-radius:20px; border:1px solid rgba(148, 163, 184, 0.5); padding:0.9rem;">
+                  <div style="display:flex; justify-content:space-between; font-size:0.78rem; color:var(--text-muted); margin-bottom:0.25rem;">
+                    <span>New leads added</span><strong style="color:var(--text-main);">Today</strong>
+                  </div>
+                  <div style="display:flex; justify-content:space-between; font-size:0.78rem; color:var(--text-muted); margin-bottom:0.25rem;">
+                    <span>Name + Website</span><strong style="color:var(--text-main);">✅</strong>
+                  </div>
+                  <div style="display:flex; justify-content:space-between; font-size:0.78rem; color:var(--text-muted); margin-bottom:0.25rem;">
+                    <span>Email / Phone (when available)</span><strong style="color:var(--text-main);">✅</strong>
+                  </div>
+                  <div style="position:relative; height:6px; border-radius:999px; background: rgba(15, 23, 42, 0.9); overflow:hidden; margin-top:0.45rem;">
+                    <div style="position:absolute; inset:0; background: linear-gradient(90deg, #22c1c3, #facc15); transform-origin:left; animation: fillPulse 4.6s ease-in-out infinite;"></div>
+                  </div>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.76rem; color:var(--text-muted); margin-top:0.85rem;">
+                  <div>Google Sheets + automation</div>
+                  <div style="padding:0.28rem 0.6rem; border-radius:999px; background: rgba(15, 23, 42, 0.9); border:1px solid rgba(148, 163, 184, 0.5); color: var(--accent-gold); font-size:0.7rem;">
+                    Your sheet
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="pricing" id="pricing">
+          <div class="pricing-inner">
+            <h2 style="font-size:1.25rem; font-weight:600; margin-bottom:0.35rem;">Pricing</h2>
+            <p style="color:var(--text-muted); margin-bottom:1.3rem;">
+              Choose your niche + region at checkout. We handle setup after purchase.
+            </p>
+
+            <div class="plans">
+              <div class="plan">
+                <div class="plan-name">Single-Niche System</div>
+                <div class="plan-price">$40 <span>/month</span></div>
+                <p class="plan-caption">1 niche + 1 region. Best for one offer.</p>
+                <ul class="plan-list">
+                  <li><div class="plan-list-bullet"></div><div>Pick a niche from the list</div></li>
+                  <li><div class="plan-list-bullet"></div><div>Enter your target region at checkout</div></li>
+                  <li><div class="plan-list-bullet"></div><div>Leads populate into your Google Sheet over time</div></li>
+                  <li><div class="plan-list-bullet"></div><div>You own the sheet + data</div></li>
+                </ul>
+                <div class="plan-cta">
+                  <button class="plan-button" onclick="window.location.href='https://buy.stripe.com/4gM00ib9JdGI5RscH99Ve00'">
+                    Get the $40 plan
+                  </button>
+                  <div style="font-size:0.76rem; color:var(--text-muted);">Cancel anytime.</div>
+                </div>
+              </div>
+
+              <div class="plan plan-popular">
+                <div class="plan-badge">Most Popular</div>
+                <div class="plan-name">Multi-Niche Bundle</div>
+                <div class="plan-price">$90 <span>/month</span></div>
+                <p class="plan-caption">For agencies testing multiple niches.</p>
+                <ul class="plan-list">
+                  <li><div class="plan-list-bullet"></div><div>Multiple niches active (as you configure)</div></li>
+                  <li><div class="plan-list-bullet"></div><div>Better for multiple offers / clients</div></li>
+                  <li><div class="plan-list-bullet"></div><div>Same “live lead sheet” delivery</div></li>
+                  <li><div class="plan-list-bullet"></div><div>Upgrade anytime from $40</div></li>
+                </ul>
+                <div class="plan-cta">
+                  <button class="plan-button" onclick="window.location.href='https://buy.stripe.com/14AcN4b9JeKM7ZAaz19Ve01'">
+                    Get the $90 plan
+                  </button>
+                  <div style="font-size:0.76rem; color:var(--text-muted);">Cancel anytime.</div>
+                </div>
+              </div>
+            </div>
+
+            <p style="margin-top:1.2rem; font-size:0.78rem; color:var(--text-muted);">
+              Note: Lead volume varies by niche/region and public web availability. This is a lead sheet system, not a guarantee of booked calls or revenue.
+            </p>
+          </div>
+        </section>
+
+        <section style="margin-bottom:2.6rem; border-radius: var(--section-radius); border:1px solid rgba(148,163,184,0.5); background: radial-gradient(circle at top, rgba(15,23,42,0.9), rgba(15,23,42,0.98)); padding:1.5rem 1.25rem;">
+          <h3 style="font-size:1rem; font-weight:600; margin-bottom:0.5rem;">FAQ (quick)</h3>
+          <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:0.75rem;">
+            You pick the niche + region at checkout. After payment, we send onboarding instructions and connect your sheet.
+          </p>
+          <div style="color:var(--text-muted); font-size:0.85rem;">
+            <strong style="color:var(--accent-gold); font-weight:600;">Compliance:</strong>
+            You’re responsible for outreach compliance (CASL/CAN-SPAM/GDPR, etc.). This tool gathers publicly available web data and organizes it.
+          </div>
+        </section>
+      </main>
+
+      <footer class="footer">
+        <div>© <span id="year"></span> LeadAlchemy. All rights reserved.</div>
+        <div class="footer-links">
+          <a href="#">Terms</a>
+          <a href="#">Privacy</a>
+        </div>
+      </footer>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
